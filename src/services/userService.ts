@@ -1,61 +1,58 @@
 // service user (Lógica de negocio para operaciones de usuarios)
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User, UserInput } from '../data/userData';
-import { db } from '../db';
+import { User, UserInput } from '../models/user';
 import { config } from '../config/config';
+import { userData  } from '../data/userData';
 
 export class UserService {
-  async registerUser(userData: UserInput): Promise<Omit<User, 'password'>> {
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
-    const result = await db.query(
-      'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING id, username, role',
-      [userData.username, hashedPassword, userData.role]
-    );
-    return result.rows[0];
+  async registerUser(userInput: UserInput): Promise<Omit<User, 'password'>> {
+    const hashedPassword = await bcrypt.hash(userInput.password, 10);
+    const userToCreate = {
+      ...userInput,
+      hashedPassword
+    };
+
+    return await userData.registerUser(userToCreate);
   }
 
   async loginUser(username: string, password: string): Promise<string | null> {
-    const result = await db.query('SELECT * FROM users WHERE username = $1', [username]);
-    const user = result.rows[0];
+    const user = await userData.getUserByUsername(username);
+    
     if (user && await bcrypt.compare(password, user.password)) {
-      return jwt.sign({ id: user.id, username: user.username, role: user.role }, config.jwt.secret, { expiresIn: '1h' });
+      return jwt.sign(
+        { id: user.id, username: user.username, role: user.role },
+        config.jwt.secret,
+        { expiresIn: '1h' }
+      );
     }
+    
     return null;
   }
-  async getAllUsers(): Promise<User[]> {
-    const result = await db.query('SELECT id, username, role FROM users');
-    return result.rows;
+
+  async getAllUsers(): Promise<Omit<User, 'password'>[]> {
+    return await userData.getAllUsers();
   }
 
-  async updateUser(id: number, userData: Partial<UserInput>): Promise<User> {
-    const fields = [];
-    const values = [];
-    let query = 'UPDATE users SET ';
+  async updateUser(id: number, userInput: Partial<UserInput>): Promise<User> {
+    const updateData: Partial<User> = {};
 
-    if (userData.username) {
-      fields.push('username = $' + (fields.length + 1));
-      values.push(userData.username);
+    if (userInput.username) {
+      updateData.username = userInput.username;
     }
-    if (userData.password) {
-      const hashedPassword = await bcrypt.hash(userData.password, 10);
-      fields.push('password = $' + (fields.length + 1));
-      values.push(hashedPassword);
+    if (userInput.password) {
+      updateData.password = await bcrypt.hash(userInput.password, 10);
     }
-    if (userData.role) {
-      fields.push('role = $' + (fields.length + 1));
-      values.push(userData.role);
+    if (userInput.role) {
+      updateData.role = userInput.role;
     }
 
-    query += fields.join(', ') + ' WHERE id = $' + (fields.length + 1) + ' RETURNING id, username, role';
-    values.push(id);
-
-    const result = await db.query(query, values);
-    return result.rows[0];
+    return userData.updateUser(id, updateData);
   }
+
 
   async deleteUser(id: number): Promise<void> {
-    await db.query('DELETE FROM users WHERE id = $1', [id]);
+    await userData.deleteUser(id);
   }
 }
 

@@ -5,6 +5,7 @@ import { User } from "../models/user";
 
 export function authorize(...allowedRoles: User["role"][]) {
   return async (req: Request, _res: Response, next: NextFunction) => {
+    next();
     /*
     debugger;
     if (!req.userId) return next(new ApiError("No autorizado", 401));
