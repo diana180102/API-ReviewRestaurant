@@ -22,7 +22,7 @@ export class RestaurantData{
     }
 
     async getRestaurantById(id: number): Promise<Restaurant | null> {
-    const result = await db.query("SELECT * FROM restaurants WHERE id = $1", [id]);
+    const result = await db.query("SELECT * FROM restaurant WHERE id = $1", [id]);
     return result.rows.length ? result.rows[0] : null;
 }
 
@@ -53,7 +53,7 @@ export class RestaurantData{
        const setClauses = entries.map(([key, _], index) =>
          `${key} = $${index+1}`);
 
-       const updateData = `UPDATE restaurants SET ${setClauses.join(",")} 
+       const updateData = `UPDATE restaurant SET ${setClauses.join(",")} 
                            WHERE id = $${entries.length + 1} RETURNING *; `; 
 
        const params = [...entries.map(([_, value]) => value), id];
@@ -61,6 +61,19 @@ export class RestaurantData{
        const result = await db.query(updateData, params);
        
        return result.rows[0];
+    }
+
+    async deleteRestaurant(id:number){
+        
+        const deleteData = `DELETE FROM restaurant WHERE id = $1;`;
+
+        try {
+            return await db.query(deleteData, [id]);
+        } catch (error) {
+             throw new ApiError("Error in delete Data of restaurant", 400);
+        }
+
+
     }
     
 

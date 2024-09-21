@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { restaurantService } from '../services/restaurantService';
 import { ApiError } from '../middlewares/error';
-import { Restaurant, restaurantSchema } from '../models/restaurant';
+import {  restaurantUpdateSchema } from '../models/restaurant';
 export class RestaurantController {
     async getAllRestaurants(req:Request, res:Response, next:NextFunction){
         try {
@@ -39,9 +39,9 @@ export class RestaurantController {
         try {
             
             const {id} = req.params;
-            const restaurantData:Restaurant = req.body;
+            const restaurantData = req.body;
 
-            const validatedUpdates = restaurantSchema.partial().parse(restaurantData);
+            const validatedUpdates = restaurantUpdateSchema.parse(restaurantData);
             const updateR = await restaurantService.updateRestaurant(Number(id), validatedUpdates);
             
             res.status(200).json({
@@ -53,6 +53,20 @@ export class RestaurantController {
         } catch (error) {
             next(error);
         }
+    }
+
+    async deleteRestaurant (req:Request, res:Response, next:NextFunction){
+         try {
+            const idRestaurant = parseInt(req.params['id']);
+            await restaurantService.deleteRestaurant(idRestaurant);
+            res.status(200).json({
+                ok: true,
+                message: "Restaurant delete success"
+            })
+            
+         } catch (error) {
+            next(new ApiError( "error in delete restaurant data", 400));
+         }
     }
 
 
