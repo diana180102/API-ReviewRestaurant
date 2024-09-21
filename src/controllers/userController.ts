@@ -1,1 +1,1 @@
-// controllers user
+// controllers user (Lógica de control para operaciones de usuarios)
