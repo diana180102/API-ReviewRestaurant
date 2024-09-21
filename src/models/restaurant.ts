@@ -21,5 +21,7 @@ export interface UpdateRestaurantParams {
     fieldsToUpdate: Record<string,any>
 }
 
+export const restaurantUpdateSchema = restaurantSchema.partial();
+
 export type RestaurantParams = z.infer<typeof restaurantSchema>;
 export type Restaurant = RestaurantParams & {id: number};
