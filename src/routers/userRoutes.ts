@@ -10,7 +10,7 @@ const userController = new UserController();
 router.post('/register', userController.register);
 router.post('/login', userController.login);
 // Rutas protegidas (solo accesibles con token y roles autorizados)
-router.get('/users', authMiddleware, authorize('admin'), userController.getAllUsers);
+router.get('/users', authMiddleware, authorize('admin','user'), userController.getAllUsers);
 router.put('/users/:id', authMiddleware, authorize('admin'), userController.updateUser);
 router.delete('/users/:id', authMiddleware, authorize('admin'), userController.deleteUser);
 
