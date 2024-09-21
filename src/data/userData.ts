@@ -1,27 +1,18 @@
 // data user ( tipos o interfaces para datos de usuario)
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
-import { config } from '../config/config';
 
-export interface AuthRequest extends Request {
-  user?: {
-    id: number;
-    username: string;
-    role: string;
-  };
+import { z } from 'zod';
+
+export interface User {
+  id: number;
+  username: string;
+  password: string;
+  role: 'admin' | 'user';
 }
 
-export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+export const UserSchema = z.object({
+  username: z.string().min(3).max(50),
+  password: z.string().min(6).max(255),
+  role: z.enum(['admin', 'user']).default('user'),
+});
 
-  if (!token) return res.status(401).json({ error: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, config.jwt.secret);
-    req.user = decoded as AuthRequest['user'];
-    next();
-  } catch (error) {
-    return res.status(403).json({ error: 'Invalid token' });
-  }
-};
+export type UserInput = z.infer<typeof UserSchema>;

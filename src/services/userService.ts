@@ -23,6 +23,41 @@ export class UserService {
     }
     return null;
   }
+  async getAllUsers(): Promise<User[]> {
+    const result = await db.query('SELECT id, username, role FROM users');
+    return result.rows;
+  }
+
+  async updateUser(id: number, userData: Partial<UserInput>): Promise<User> {
+    const fields = [];
+    const values = [];
+    let query = 'UPDATE users SET ';
+
+    if (userData.username) {
+      fields.push('username = $' + (fields.length + 1));
+      values.push(userData.username);
+    }
+    if (userData.password) {
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      fields.push('password = $' + (fields.length + 1));
+      values.push(hashedPassword);
+    }
+    if (userData.role) {
+      fields.push('role = $' + (fields.length + 1));
+      values.push(userData.role);
+    }
+
+    query += fields.join(', ') + ' WHERE id = $' + (fields.length + 1) + ' RETURNING id, username, role';
+    values.push(id);
+
+    const result = await db.query(query, values);
+    return result.rows[0];
+  }
+
+  async deleteUser(id: number): Promise<void> {
+    await db.query('DELETE FROM users WHERE id = $1', [id]);
+  }
 }
+
 
 export const userService = new UserService();

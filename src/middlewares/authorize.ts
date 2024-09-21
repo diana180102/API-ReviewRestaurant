@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/user";
 
-import { ApiError } from "./error";
+// import { ApiError } from "./error";
 
 export function authorize(...allowedRoles: User["role"][]) {
   return async (req: Request, _res: Response, next: NextFunction) => {
+    /*
     debugger;
     if (!req.userId) return next(new ApiError("No autorizado", 401));
 
@@ -17,5 +18,6 @@ export function authorize(...allowedRoles: User["role"][]) {
     } else {
       next(new ApiError("Acceso denegado", 403));
     }
+    */
   };
 }
