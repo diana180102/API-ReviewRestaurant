@@ -2,7 +2,7 @@
 
 import { Request, Response } from 'express';
 import { userService } from '../services/userService';
-import { UserSchema } from '../data/userData';
+import { UserSchema } from '../models/user';
 
 export class UserController {
   async register(req: Request, res: Response) {
