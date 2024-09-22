@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { reviewsServiceRestaurant } from "../services/reviewsService";
-import { ReviewsParams, reviewsSchema } from "../models/reviews";
+import { ReviewsParams, reviewsSchema, ReviewsUpdateSchema } from "../models/reviews";
 import { ApiError } from "../middlewares/error";
 
 export class ReviewsController {
@@ -43,6 +43,40 @@ export class ReviewsController {
     } catch (error) {
         next(new ApiError("Error in add review", 400));
     }
+  }
+
+  async updateReviewRestaurant(req:Request, res:Response, next:NextFunction){
+    try {
+        
+        const {id} = req.params;
+        const restaurantReviewData = req.body;
+
+        const validatedUpdates = ReviewsUpdateSchema.parse(restaurantReviewData);
+        const updateR = await reviewsServiceRestaurant.updateReviewRestaurant(Number(id), validatedUpdates);
+        
+        res.status(200).json({
+         ok: true,
+         message: "Update data of review",
+         data: updateR
+      });
+
+    } catch (error) {
+        next(error);
+    }
+  }
+
+  async deleteReviewRestaurant (req:Request, res:Response, next:NextFunction){
+     try {
+        const id = parseInt(req.params['id']);
+        await reviewsServiceRestaurant.deleteReviewRestaurant(id);
+        res.status(200).json({
+            ok: true,
+            message: "Review delete success"
+        })
+        
+     } catch (error) {
+        next(new ApiError( "error in delete review data", 400));
+     }
   }
 }
 

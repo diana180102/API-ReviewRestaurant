@@ -9,6 +9,8 @@ const reviewsController = new ReviewsController();
 
 reviewsRouter.get('/:id/reviews', authMiddleware, authorize('admin','user'), reviewsController.getAllReviewsRestaurant);
 reviewsRouter.post('/:id/reviews', authMiddleware, authorize('admin'), reviewsController.addReviewRestaurant);
+reviewsRouter.put('/reviews/:id', authMiddleware, authorize('admin'), reviewsController.updateReviewRestaurant);
+reviewsRouter.delete('/reviews/:id', authMiddleware, authorize('admin'), reviewsController.deleteReviewRestaurant);
 
 
 export default reviewsRouter;

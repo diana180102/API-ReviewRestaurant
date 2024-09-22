@@ -26,5 +26,12 @@ export const reviewsSchema = z.object({
     }),
 });
 
-export type ReviewsParams = z.infer<typeof reviewsSchema> ;
+export interface UpdateReviewsParams {
+    id: number
+    fieldsToUpdate: Record<string,any>
+}
 
+export const ReviewsUpdateSchema = reviewsSchema.partial();
+
+export type ReviewsParams = z.infer<typeof reviewsSchema>;
+export type Reviews = ReviewsParams & {id: number};
