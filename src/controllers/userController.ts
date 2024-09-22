@@ -47,6 +47,7 @@ export class UserController {
         res.status(500).json({ error: 'Server error' });
         }
     };
+    
   async deleteUser(req: Request, res: Response) {
     try {
         const userId = parseInt(req.params['id'], 10); // Convertir id a número
